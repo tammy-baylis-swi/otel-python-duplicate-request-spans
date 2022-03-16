@@ -1,0 +1,23 @@
+version: '2.4' 
+
+services:
+  django-app-a-ot:
+    stdin_open: true
+    tty: true
+    image: otel-python-test:django-a-ot
+    build:
+      context: ./django_app_a/
+      dockerfile: Dockerfile
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./django_app_a/:/app
+    entrypoint: ["/bin/bash","-c"]
+    working_dir: /app/
+    command:
+    - |
+       # start simple Django app (--noreload is needed as auto-instrumentation is broken otherwise)
+       opentelemetry-instrument python manage.py runserver 0.0.0.0:8008 --noreload
+    environment:
+      DJANGO_SETTINGS_MODULE: instrumentation_example.settings
+      PYTHON_DEBUG_LEVEL: ${PYTHON_DEBUG_LEVEL}
